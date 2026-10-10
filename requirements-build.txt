@@ -1,0 +1,4 @@
+# Extra dependency to build the Windows .exe (install on Windows only):
+#   python -m pip install -r requirements.txt -r requirements-build.txt
+#   python build_windows_exe.py
+pyinstaller>=6.0.0

@@ -1,0 +1,30 @@
+# Generated reports (batch_*.csv, query_*.csv)
+output/
+
+# Local spreadsheets — often contain patient-identifiable data
+data/
+!data/.gitkeep
+
+# PyInstaller / Windows package build
+build/
+dist/
+*.spec
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+*.egg-info/
+.eggs/
+
+# Atomic write leftovers (catalog / config saves)
+*.tmp
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~

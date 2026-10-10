@@ -1,0 +1,115 @@
+"""Canonical PSCV / CESFAM spreadsheet column headers.
+
+PSCV is Chile's cardiovascular health program. CESFAM is a family health
+center. The strings below are the headers as they appear in the source
+workbooks, including typos, double spaces, and spelling differences between
+the San José and El Yeco templates. Do not "fix" them: lookups compare
+against these exact texts (or a normalized form of them).
+"""
+
+# Columns used most often by segmented queries.
+COL_AGE = "EDAD"
+COL_SEX = "SEXO"
+COL_CV_RISK = "RIESGO CARDIOVASCULAR  (BAJO, MODERADO, ALTO)"
+COL_DIABETES_MELLITUS_2 = "DIAGNOSTICO PSCV DE DIABETES MELLITUS 2 (SI, NO)"
+
+# Hypertension diagnosis. San José includes "PSCV DE"; El Yeco does not.
+COL_HYPERTENSION = "DIAGNOSTICO  PSCV DE HTA (SI,NO)"
+COL_HYPERTENSION_ALT = "DIAGNOSTICO  HTA (SI, NO)"
+COL_HYPERTENSION_VARIANTS = (COL_HYPERTENSION, COL_HYPERTENSION_ALT)
+
+COL_HBA1C_VALUE = "HbA1C Valor"
+COL_ACR_VALUE = "VALOR RAC"  # RAC: albumin/creatinine ratio
+COL_EGFR_VALUE = "VFG valor"  # VFG: estimated glomerular filtration rate
+COL_AMPUTATION = "CON AMPUTACIÓN POR PIE DIABÉTICO (SI, NO)"
+
+# Insulin use. El Yeco has no space after the comma; San José does.
+COL_INSULIN = "PACIENTE CON INSULINA (SI,NO)"
+COL_INSULIN_ALT = "PACIENTE CON INSULINA (SI, NO)"
+COL_INSULIN_VARIANTS = (COL_INSULIN, COL_INSULIN_ALT)
+
+# Templates usually put two spaces after FECHA.
+COL_ACR_DATE = "FECHA  RAC"
+
+# Header order from the PSCV template. Kept as a reference for validation
+# and for spotting columns that a new export dropped or renamed.
+PSCV_COLUMNS = [
+    "FECHA DE ACTUALIZACION",
+    "Columna 1",
+    "Columna 3",
+    "NOMBRE",
+    "FECHA DE NACIMIENTO",
+    COL_AGE,
+    COL_SEX,
+    "ACTIVIDAD FISICA (SI,NO)",
+    "peso",
+    "TALLA EN METROS",
+    "IMC",
+    "GRUPO IMC",
+    "FECHA INGRESO PSCV",
+    "EGRESO DE PROGRAMA (FALLECIMIENTO/TRASLADO)",
+    COL_HYPERTENSION,
+    "DIANOSTICO PSCV DE DISLIPIDEMIA  (SI, NO)",
+    COL_DIABETES_MELLITUS_2,
+    "ECV (OTRA ENFERMERAD CARDIOVASCULAR) (SI,NO)",
+    "OTRA PATOLOGIA",
+    "OTRA PATOLOGIA  2",
+    "CATEGORIZACION ECICEP",
+    "PACIENTE COMPENSADO (SI O NO)",
+    "INGRESADO A ECICEP (SI O NO)",
+    "FECHA DE INGRESO ECICEP",
+    COL_CV_RISK,
+    "FUMADOR ACTUAL (SI, NO)",
+    "IAM (SI, NO)",
+    "ACV (SI, NO)",
+    "ERC (SI, NO, DESCONOCE)",
+    "ETAPA ERC (G1,G2,G3a, G3b,G4,G5, DESCONOCE ERC)",
+    COL_EGFR_VALUE,
+    "FECHA VFG",
+    "VALOR CREATININA",
+    "HbA1C FECHA (VIGENCIA 12 MESES)",
+    COL_HBA1C_VALUE,
+    "PERFIL LIPIDICO VIGENTE (VIGENCIA 12 MESES) (SI, NO)",
+    "FECHA PERFIL LIPIDICO",
+    "COLESTEROL TOTAL VALOR",
+    "VALOR LDL",
+    "VALOR HDL",
+    "VALOR TGCDS",
+    "VALOR GLICEMIA",
+    COL_ACR_DATE,
+    COL_ACR_VALUE,
+    "PA SISTOLICA",
+    "PA DIASTOLICA",
+    "LOSARTAN O ENALAPRIL (SI,NO)",
+    "ASPIRINA (SI,NO)",
+    "ESTATINA (SI, NO)",
+    "FECHA FONDO DE OJO",
+    "FONDO DE OJO VIGENTE (12 MESES)(SI, NO)",
+    "RETINOPATIA DIABETICA (SI, NO)",
+    "DIABETICO CON PODOLOGA VIGENTE (SI, NO) (REALIZADA DENTRO DE LOS ULTIMOS 12 MESES)",
+    "FECHA ULTIMA ATENCION CON PODOLOGA",
+    "ERUP (SI, NO)",
+    "RESULTADO ERUP",
+    "FECHA ERUP (12 MESES DE VIGENCIA)",
+    "FECHA ELECTRO",
+    "ELECTRO  VIGENTE (12 MESES) (SI, NO)",
+    COL_INSULIN,
+    "CON DIAGNÓSTCO DE GLICEMIA DE AYUNAS ALTERADA (SI, NO)",
+    "CON ÚLCERAS ACTIVAS DE PIE TRATADAS CON CURACIÓN (SI, NO)(DENTRO DE LOS ULTIMOS 12 MESES)",
+    "TIPO CURACION (CONVENCIONAL, AVANZADA, CON AYUDA TECNICA DE DESCARGA)",
+    COL_AMPUTATION,
+    "EN  TRATAMIENTO CON INSULINA QUE LOGRA META CON  HbA1C SEGÚN EDAD (SI, NO)",
+    "FECHA ULTIMO CONTROL MEDICO",
+    "FECHA ULTIMO CONTROL NUTRICIONISTA",
+    "FECHA ULTIMO CONTROL ENFERMERA",
+    "FECHA PROXIMO CONTROL",
+    "PROFESIONAL PROX, CONTROL",
+    "PRESION SOBRE 160/100 (SI,NO)",
+    "PROTOCOLO HEART (SI,NO)",
+    "HIPOGLUCEMIAS RECURRENTES (SI, NO)",
+    "CON PLAN DE CUIDADOS (SI/NO)",
+    "PLAN DE  CUIDADO ACTUALIZADO (SI/NO)",
+    "FECHA DE ULTIMA ACTUALIZACION",
+    "Columna 2",
+    "Columna 3 2",
+]

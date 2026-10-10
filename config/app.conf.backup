@@ -1,0 +1,15 @@
+# General app settings for interactive_query.py
+#
+# Edit this file per project. A snapshot of the defaults lives in
+# app.conf.backup.
+#
+# Boolean values: true / false (also yes/no, 1/0).
+
+# SILENT_MODE (default: true)
+#   true  → only the batch_*.csv is written; no per-query CSV files
+#   false → each query writes its own CSV under output/ (query_*.csv)
+#           AND appends one line to the session batch_*.csv
+#
+# Silent mode keeps output/ quieter when you only need the batch grid.
+# Set false when you want a detailed CSV for every expression.
+SILENT_MODE=true

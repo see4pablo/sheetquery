@@ -1,0 +1,47 @@
+# Column short names → one or more spreadsheet headers.
+#
+# Format (one alias per line):
+#   SHORT_NAME=HEADER
+#   SHORT_NAME="HEADER WITH, COMMAS", "OTHER HEADER"
+#
+# Quote any header that contains a comma. When several headers are listed,
+# the first one present in the loaded workbook wins (fingerprint match:
+# spaces and accents are ignored).
+#
+# Lines starting with # are comments. Blank lines are ignored.
+# Edit this file per project; a snapshot of the defaults lives in
+# column_aliases.conf.backup.
+
+# Type 2 diabetes (PSCV)
+DIABETES="DIAGNOSTICO PSCV DE DIABETES MELLITUS 2 (SI, NO)"
+DM2="DIAGNOSTICO PSCV DE DIABETES MELLITUS 2 (SI, NO)"
+T2DM="DIAGNOSTICO PSCV DE DIABETES MELLITUS 2 (SI, NO)"
+
+# Cardiovascular risk classification
+RCV="RIESGO CARDIOVASCULAR  (BAJO, MODERADO, ALTO)"
+CV="RIESGO CARDIOVASCULAR  (BAJO, MODERADO, ALTO)"
+
+# Albumin/creatinine ratio (RAC)
+RAC="VALOR RAC"
+ACR="VALOR RAC"
+
+# Estimated glomerular filtration rate (VFG)
+VFG="VFG valor"
+EGFR="VFG valor"
+
+# HbA1c
+HBA1C="HbA1C Valor"
+A1C="HbA1C Valor"
+
+# Hypertension: San José vs El Yeco headers differ
+HYPERTENSION="DIAGNOSTICO  PSCV DE HTA (SI,NO)", "DIAGNOSTICO  HTA (SI, NO)"
+HIPERTENSION="DIAGNOSTICO  PSCV DE HTA (SI,NO)", "DIAGNOSTICO  HTA (SI, NO)"
+HTA="DIAGNOSTICO  PSCV DE HTA (SI,NO)", "DIAGNOSTICO  HTA (SI, NO)"
+
+# Insulin use: spacing after the comma differs between templates
+INSULIN="PACIENTE CON INSULINA (SI,NO)", "PACIENTE CON INSULINA (SI, NO)"
+INSULINA="PACIENTE CON INSULINA (SI,NO)", "PACIENTE CON INSULINA (SI, NO)"
+
+# Diabetic-foot amputation
+AMPUTATION="CON AMPUTACIÓN POR PIE DIABÉTICO (SI, NO)"
+AMPUTACION="CON AMPUTACIÓN POR PIE DIABÉTICO (SI, NO)"
