@@ -1,13 +1,15 @@
 # SheetQuery
 
-Python tool to filter spreadsheets (PSCV / CESFAM exports and similar) and produce counts by **age band** and **sex**, ready to paste into Excel.
+Python tool to filter spreadsheets (PSCV / CESFAM 🇨🇱 exports and similar) and produce counts by **age band** and **sex**, ready to paste into Excel.
 
 ## What it does
 
 - Reads an Excel/CSV file (including cases where the real header starts several rows down).
-- Applies query expressions such as `DIABETES = SI AND HBA1C < 8`.
+- Applies simple query expressions over spreadsheet columns (see examples below).
 - Writes `output/batch_*.csv` (one numeric row per query).
 - Optionally writes one CSV per query (controlled by `SILENT_MODE`).
+
+Chilean clinic exports often store answers in Spanish. In the examples, `SI` means **yes**, `NO` means **no**, and labels like `BAJO` / `MODERADO` / `ALTO` mean **low** / **moderate** / **high**. The tool matches the text that is actually in the cells.
 
 **Important:** workbooks often contain identifiable health data. Do not push them to public repositories or send them over insecure channels. The `data/` folder is gitignored on purpose.
 
@@ -44,7 +46,7 @@ Useful commands while typing expressions: `BLANK` / `SPACE` / `ESPACIO` (empty l
 
 #### Example interactive session
 
-Put a spreadsheet in `data/` (for example `yeco.csv`), then:
+Put a spreadsheet in `data/` (for example `yeco.csv`), then type short filters. Each line asks for a subset of people; the tool counts them by age band and sex.
 
 ```text
 $ python interactive_query.py
@@ -53,23 +55,24 @@ Queries file (optional):          ← press Enter to type queries by hand
 
 Expression: RCV = BAJO
 Expression: DIABETES = SI
-Expression: DIABETES = SI AND HBA1C < 8
+Expression: DIABETES = SI AND FUMADOR = SI
 Expression: ESPACIO               ← or SPACE / BLANK: empty line in the output (layout only)
-Expression: HIPERTENSION = SI AND (PA SISTOLICA < 140 AND PA DIASTOLICA < 90)
+Expression: HIPERTENSION = SI
 Expression:                       ← empty Enter finishes the session
 ```
 
 `ESPACIO`, `SPACE`, or `BLANK` does **not** run a filter. It writes an **empty line** in the final `batch_*.csv` so related blocks of results stay visually separated when you paste into a spreadsheet (ordering/layout only).
 
-Example expressions you can type (cell values stay as in the workbook: `SI`, `NO`, `BAJO`, …):
+Example queries and what they mean in plain English (values follow the spreadsheet language):
 
-| Expression | Meaning |
-|---|---|
-| `RCV = BAJO` | Cardiovascular risk = low |
-| `DIABETES = SI` | Diabetes diagnosis = yes |
-| `DIABETES = SI AND HBA1C < 8` | Diabetes with HbA1c under 8 |
-| `HIPERTENSION = SI AND (PA SISTOLICA < 140 AND PA DIASTOLICA < 90)` | Hypertension with controlled BP |
-| `ESPACIO` / `SPACE` / `BLANK` | Empty line in the output (separator for layout) |
+| Example query | Plain English | Example spreadsheet data |
+|---|---|---|
+| `DIABETES = SI` | People marked **yes** for diabetes | Diabetes column cell = `SI` |
+| `RCV = BAJO` | People with **low** cardiovascular risk | Risk column cell = `BAJO` |
+| `FUMADOR = SI` | People marked **yes** as current smokers | Smoker column cell = `SI` |
+| `DIABETES = SI AND FUMADOR = SI` | People who have diabetes **and** smoke | Both columns = `SI` |
+| `HIPERTENSION = SI` | People marked **yes** for high blood pressure | Hypertension column cell = `SI` |
+| `ESPACIO` / `SPACE` / `BLANK` | Empty line in the output (layout only) | — |
 
 When you finish, open `output/batch_*.csv`. That file is a **numeric grid** (one row per query, comma-separated counts by age band and sex) meant to be **pasted into Microsoft Excel, Google Sheets, LibreOffice Calc, or any similar spreadsheet**. Select the number rows (or open/import the CSV), paste into your sheet, and the values land in columns ready to match your reporting template.
 
@@ -136,22 +139,23 @@ Aliases and segmentation can be adapted per project without changing code.
 
 Files under `queries/`:
 
-- `dani_y.json` — PSCV query set (workbooks like `yeco.csv` / `sanjose.csv`)
+- `dani_y.json` — reference PSCV query set (workbooks like `yeco.csv` / `sanjose.csv`)
 - `queries.json` — editable session catalog
 
-Format:
+Format (same idea as typing interactively — short filters over example columns):
 
 ```json
 {
   "queries": [
     "RCV = BAJO",
-    "DIABETES = SI AND HBA1C < 8",
+    "DIABETES = SI",
+    "DIABETES = SI AND FUMADOR = SI",
     "ESPACIO"
   ]
 }
 ```
 
-Cell values stay in the workbook language (`SI`, `NO`, `BAJO`, …).
+Again: `SI` / `NO` / `BAJO` are the values stored in typical Chilean exports (yes / no / low). Your aliases in `config/column_aliases.conf` map short names like `DIABETES` to the real spreadsheet headers.
 
 ## Tests
 
@@ -169,7 +173,7 @@ If you redistribute the program (for example the Windows zip), include this `REA
 
 ## Credits and AI use
 
-- **Author:** Pablo  
-- **Reference query set (`dani_y`):** prepared with / for CESFAM support use (credit to Dani for the query set).
+- **Author:** Pablo (Chile 🇨🇱)
+- **Reference query set (`dani_y`):** prepared with Dani — a great friend of mine — for support work with CESFAM 🇨🇱 (Chilean family health centers).
 
 **This project was developed with AI assistance** (AI-assisted coding tools, e.g. Cursor). Design choices, review, configuration data, and responsibility for how the software is used remain with the human author. The AI note lives in the README (not in the license) because the license governs legal permissions; the README is the usual place for transparency about how the code was built.
