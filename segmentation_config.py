@@ -1,7 +1,8 @@
 """Load report segmentation settings from config/segmentation.conf.
 
 Controls whether results are split by age bands and/or sex, which spreadsheet
-headers hold those values, and how age bands are cut.
+headers hold those values, how age bands are cut, and which column identifies
+a unique person/patient for deduplication before counting.
 
 See config/segmentation.conf for the format. Defaults match the historical
 CESFAM tables: age on from 15 in steps of 5 with an open 80+ band, and sex on.
@@ -65,6 +66,8 @@ class SegmentationConfig:
     age_range: AgeRange
     gender_segmentation: bool
     gender_columns: tuple[str, ...]
+    # Empty tuple → do not deduplicate (count every matching row).
+    dedup_columns: tuple[str, ...]
 
 
 def _parse_bool(raw: str, *, key: str, line_number: int) -> bool:
@@ -76,13 +79,20 @@ def _parse_bool(raw: str, *, key: str, line_number: int) -> bool:
     raise ValueError(f"Line {line_number}: {key} must be true/false, got {raw!r}")
 
 
-def _parse_header_list(raw: str, *, key: str, line_number: int) -> tuple[str, ...]:
+def _parse_header_list(
+    raw: str, *, key: str, line_number: int, allow_empty: bool = False
+) -> tuple[str, ...]:
+    stripped = raw.strip()
+    if not stripped:
+        if allow_empty:
+            return ()
+        raise ValueError(f"Line {line_number}: {key} has no headers.")
     try:
-        headers = next(csv.reader(StringIO(raw.strip()), skipinitialspace=True))
-    except csv.Error as exc:
+        headers = next(csv.reader(StringIO(stripped), skipinitialspace=True))
+    except (csv.Error, StopIteration) as exc:
         raise ValueError(f"Line {line_number}: invalid {key} list: {exc}") from exc
     cleaned = tuple(header.strip() for header in headers if header.strip())
-    if not cleaned:
+    if not cleaned and not allow_empty:
         raise ValueError(f"Line {line_number}: {key} has no headers.")
     return cleaned
 
@@ -148,12 +158,18 @@ def parse_segmentation_text(text: str) -> SegmentationConfig:
     except ValueError as exc:
         raise ValueError(f"Line {range_line}: {exc}") from exc
 
+    dedup_line, dedup_raw = require("DEDUP_COLUMN")
+    dedup_columns = _parse_header_list(
+        dedup_raw, key="DEDUP_COLUMN", line_number=dedup_line, allow_empty=True
+    )
+
     return SegmentationConfig(
         age_segmentation=age_on,
         age_columns=age_columns,
         age_range=age_range,
         gender_segmentation=gender_on,
         gender_columns=gender_columns,
+        dedup_columns=dedup_columns,
     )
 
 

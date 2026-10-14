@@ -40,7 +40,56 @@ python interactive_query.py
 3. If you did not use a queries file, the session is saved to `queries/queries_<timestamp>.json` when you finish.
 4. Results go to `output/batch_*.csv`.
 
-Useful commands while typing expressions: `BLANK` / `ESPACIO` (blank batch row), `PREVIOUS` / `ANTERIOR` (undo).
+Useful commands while typing expressions: `BLANK` / `SPACE` / `ESPACIO` (empty line in the batch output, for layout), `PREVIOUS` / `ANTERIOR` (undo).
+
+#### Example interactive session
+
+Put a spreadsheet in `data/` (for example `yeco.csv`), then:
+
+```text
+$ python interactive_query.py
+Data file: yeco.csv
+Queries file (optional):          ← press Enter to type queries by hand
+
+Expression: RCV = BAJO
+Expression: DIABETES = SI
+Expression: DIABETES = SI AND HBA1C < 8
+Expression: ESPACIO               ← or SPACE / BLANK: empty line in the output (layout only)
+Expression: HIPERTENSION = SI AND (PA SISTOLICA < 140 AND PA DIASTOLICA < 90)
+Expression:                       ← empty Enter finishes the session
+```
+
+`ESPACIO`, `SPACE`, or `BLANK` does **not** run a filter. It writes an **empty line** in the final `batch_*.csv` so related blocks of results stay visually separated when you paste into a spreadsheet (ordering/layout only).
+
+Example expressions you can type (cell values stay as in the workbook: `SI`, `NO`, `BAJO`, …):
+
+| Expression | Meaning |
+|---|---|
+| `RCV = BAJO` | Cardiovascular risk = low |
+| `DIABETES = SI` | Diabetes diagnosis = yes |
+| `DIABETES = SI AND HBA1C < 8` | Diabetes with HbA1c under 8 |
+| `HIPERTENSION = SI AND (PA SISTOLICA < 140 AND PA DIASTOLICA < 90)` | Hypertension with controlled BP |
+| `ESPACIO` / `SPACE` / `BLANK` | Empty line in the output (separator for layout) |
+
+When you finish, open `output/batch_*.csv`. That file is a **numeric grid** (one row per query, comma-separated counts by age band and sex) meant to be **pasted into Microsoft Excel, Google Sheets, LibreOffice Calc, or any similar spreadsheet**. Select the number rows (or open/import the CSV), paste into your sheet, and the values land in columns ready to match your reporting template.
+
+#### Example output (`output/batch_….csv`)
+
+Comment lines (`# …`) describe the file and column layout; they are not pasted as data. Each data line is one query: for every age band, two numbers (**M**en then **F**/Women), in order `15-19`, `20-24`, …, `80+`. The empty line after the third query comes from `ESPACIO` / `SPACE` / `BLANK` — it is only there to group rows when you paste.
+
+```csv
+# File: yeco.csv
+# Session: 20261013_180000
+# 15-19|20-24|25-29|30-34|35-39|40-44|45-49|50-54|55-59|60-64|65-69|70-74|75-79|80+
+# M-F|M-F|M-F|M-F|M-F|M-F|M-F|M-F|M-F|M-F|M-F|M-F|M-F|M-F
+2, 3, 1, 4, 5, 6, 8, 10, 12, 14, 9, 11, 7, 8, 6, 5, 4, 3, 2, 2, 1, 1, 0, 1, 0, 0, 0, 0
+0, 1, 2, 3, 4, 5, 10, 12, 15, 18, 14, 16, 11, 13, 8, 9, 5, 6, 3, 4, 2, 2, 1, 1, 0, 1, 0, 0
+0, 0, 1, 2, 2, 3, 6, 8, 9, 11, 8, 10, 6, 7, 4, 5, 2, 3, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0
+
+1, 2, 3, 4, 5, 7, 9, 11, 13, 15, 12, 14, 10, 11, 7, 8, 4, 5, 2, 3, 1, 2, 0, 1, 0, 0, 0, 0
+```
+
+In that sample, the blank line between the third and fourth number rows is what `ESPACIO` / `SPACE` / `BLANK` produces — useful to keep blocks apart in Excel or Sheets. How to read one cell pair: under `40-44` / `M-F`, the pair `8, 10` means 8 men and 10 women in that age band for that query. Numbers above are illustrative; your file will reflect the loaded spreadsheet.
 
 ### 2. Batch (no prompts)
 
@@ -78,7 +127,7 @@ For the person who receives it:
 | `config/app.conf` | `SILENT_MODE` (default `true`: batch only, no per-query CSV) |
 | `config/run.conf` | Default data/queries for batch mode / the .exe |
 | `config/column_aliases.conf` | Short names → spreadsheet headers (`DIABETES`, `RCV`, …) |
-| `config/segmentation.conf` | Age bands and age/sex column headers |
+| `config/segmentation.conf` | Age bands, age/sex headers, and `DEDUP_COLUMN` (person key; default `Documento`, then `RUT`) |
 | `*.conf.backup` | Snapshot of the default values |
 
 Aliases and segmentation can be adapted per project without changing code.

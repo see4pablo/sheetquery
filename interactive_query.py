@@ -17,8 +17,8 @@ The words you type may be English or the older Spanish forms:
   CURRENT or VIGENTE     date of that control is within the last 12 months
   HYPERTENSION           hypertension diagnosis = SI
   CKD or ERC             ACR >= 30 OR eGFR < 60
-  BLANK or ESPACIO       blank separator row in the batch file
-  PREVIOUS or ANTERIOR   undo the last batch line (and its CSV, if any)
+  BLANK, SPACE, or ESPACIO   blank separator row in the batch file
+  PREVIOUS or ANTERIOR       undo the last batch line (and its CSV, if any)
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ import pandas as pd
 
 from app_config import get_app_config
 from column_aliases import resolve_column
-from pscv_classification import load_data, resolve_age_sex_columns
+from pscv_classification import load_data, resolve_age_sex_columns, resolve_dedup_column
 from pscv_columns import COL_CV_RISK, COL_DIABETES_MELLITUS_2, COL_HBA1C_VALUE
 from query_conditions import (
     build_expression_mask,
@@ -49,7 +49,7 @@ DATA_DIR = Path("data")
 QUERIES_DIR = Path("queries")
 OUTPUT_DIR = Path("output")
 
-BLANK_COMMANDS = frozenset({"BLANK", "ESPACIO"})
+BLANK_COMMANDS = frozenset({"BLANK", "SPACE", "ESPACIO"})
 UNDO_COMMANDS = frozenset({"PREVIOUS", "UNDO", "ANTERIOR"})
 
 
@@ -447,7 +447,8 @@ def _print_expression_help() -> None:
         "grand totals. It starts once with # File, # Session, and two segmentation "
         "comment rows (# 15-19|20-24|… and # M-F|M-F|…).\n"
         "To finish: press Enter on an empty 'Expression:' prompt.\n"
-        "  BLANK     → blank separator row in the batch file (ESPACIO still works).\n"
+        "  BLANK / SPACE / ESPACIO → blank separator row in the batch file "
+        "(for spacing/layout when pasting).\n"
         "  PREVIOUS  → remove the last batch line or blank row, and the last CSV\n"
         "              if one was written (ANTERIOR and UNDO do the same).\n"
     )
@@ -574,6 +575,7 @@ def main() -> None:
     frame = frame.dropna(how="all")
     try:
         age_column, sex_column = resolve_age_sex_columns(frame)
+        dedup_column = resolve_dedup_column(frame)
     except ValueError as exc:
         print(str(exc), file=sys.stderr)
         sys.exit(1)
@@ -584,6 +586,10 @@ def main() -> None:
     else:
         print("Queries: (interactive — session will be saved to a new file at the end)")
     print(f"Age: {age_column} · Sex: {sex_column}")
+    if dedup_column is not None:
+        print(f"Dedup: {dedup_column} (one row per person before counting)")
+    else:
+        print("Dedup: off (DEDUP_COLUMN empty in config/segmentation.conf)")
     app_cfg = get_app_config()
     if app_cfg.silent_mode:
         print(
@@ -651,7 +657,7 @@ def main() -> None:
                 stamp=stamp,
                 source_name=source.name,
             )
-            # Keep the word the user typed (BLANK or ESPACIO).
+            # Keep the word the user typed (BLANK, SPACE, or ESPACIO).
             session_expressions.append(_collapse_spaces(phrase).upper())
             print(f"Blank row added to the batch file: {batch_path.resolve()}\n")
             continue

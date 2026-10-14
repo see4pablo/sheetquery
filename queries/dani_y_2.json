@@ -1,0 +1,8 @@
+{
+  "queries": [
+    "Riesgo resultante = Riesgo bajo",
+    "Riesgo resultante = Riesgo moderado",
+    "Riesgo resultante = Riesgo alto",
+    "Riesgo resultante = Riesgo máximo"
+  ]
+}

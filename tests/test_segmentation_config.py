@@ -39,6 +39,8 @@ def test_default_segmentation_matches_historical_bands() -> None:
     assert "Edad a la Aplicación" in cfg.age_columns
     assert "SEXO" in cfg.gender_columns
     assert "Sexo" in cfg.gender_columns
+    assert cfg.dedup_columns[0] == "Documento"
+    assert "RUT" in cfg.dedup_columns
 
 
 def test_parse_age_range_forms() -> None:
@@ -57,6 +59,7 @@ def test_assign_age_group_respects_configured_start() -> None:
     AGE_RANGE=[20:10:60+]
     GENDER_SEGMENTATION=false
     GENDER_COLUMN=SEXO
+    DEDUP_COLUMN=Documento
     """
     cfg = parse_segmentation_text(text)
     ages = pd.Series([15, 20, 25, 59, 60, 80])
@@ -89,6 +92,7 @@ def test_custom_segmentation_file(tmp_path: Path) -> None:
         AGE_RANGE=[0:5:100+]
         GENDER_SEGMENTATION=true
         SEX_COLUMN=SEXO
+        DEDUP_COLUMN=
         """,
         encoding="utf-8",
     )
@@ -97,5 +101,20 @@ def test_custom_segmentation_file(tmp_path: Path) -> None:
     assert cfg.age_range.start == 0
     assert cfg.age_range.open_from == 100
     assert cfg.gender_columns == ("SEXO",)
+    assert cfg.dedup_columns == ()
     assert age_group_labels(config=cfg)[0] == "0 to 4 years"
     assert age_group_labels(config=cfg)[-1] == "100 and over"
+
+
+def test_dedup_column_parses_documento_and_rut() -> None:
+    cfg = parse_segmentation_text(
+        """
+        AGE_SEGMENTATION=true
+        AGE_COLUMN=EDAD
+        AGE_RANGE=[15:5:80+]
+        GENDER_SEGMENTATION=true
+        GENDER_COLUMN=SEXO
+        DEDUP_COLUMN=Documento, RUT
+        """
+    )
+    assert cfg.dedup_columns == ("Documento", "RUT")

@@ -104,6 +104,56 @@ def resolve_age_sex_columns(df: pd.DataFrame) -> tuple[str, str]:
     return age, sex
 
 
+def resolve_dedup_column(df: pd.DataFrame) -> str | None:
+    """Return the person/patient ID header used to deduplicate counts, or None.
+
+    Reads DEDUP_COLUMN from segmentation.conf. An empty list disables dedup.
+    When candidates are configured, the first matching workbook header wins.
+    """
+    from column_aliases import pick_column_from_candidates
+    from segmentation_config import get_segmentation
+
+    cfg = get_segmentation()
+    if not cfg.dedup_columns:
+        return None
+    picked = pick_column_from_candidates(df, list(cfg.dedup_columns))
+    if picked is None:
+        raise ValueError(
+            "Missing column for patient deduplication ("
+            + ", ".join(repr(c) for c in cfg.dedup_columns)
+            + "). Set DEDUP_COLUMN= in config/segmentation.conf to disable."
+        )
+    return picked
+
+
+def deduplicate_by_column(
+    frame: pd.DataFrame, column: str, *, keep: str = "first"
+) -> pd.DataFrame:
+    """Keep one row per non-empty person ID in `column` (file order by default).
+
+    IDs are compared after strip. Rows with a blank/missing ID are left as-is
+    (not merged with each other).
+    """
+    if column not in frame.columns:
+        raise ValueError(f"Dedup column not found: {column!r}")
+    if frame.empty:
+        return frame
+    keys = frame[column].astype("string").str.strip()
+    blank = keys.isna() | keys.eq("") | keys.str.lower().isin({"nan", "none", "<na>"})
+    marked = frame.assign(_sheetquery_dedup_key=keys)
+    with_id = marked.loc[~blank].drop_duplicates(
+        subset=["_sheetquery_dedup_key"], keep=keep
+    )
+    without_id = marked.loc[blank]
+    if without_id.empty:
+        combined = with_id
+    elif with_id.empty:
+        combined = without_id
+    else:
+        combined = pd.concat([with_id, without_id]).sort_index()
+    return combined.drop(columns=["_sheetquery_dedup_key"])
+
+
 def _infer_csv_skiprows(path: Path, separator: str) -> int:
     """Find the real header row.
 

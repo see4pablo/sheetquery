@@ -29,7 +29,7 @@ from interactive_query import (
     resolve_data_path,
     resolve_queries_path,
 )
-from pscv_classification import load_data, resolve_age_sex_columns
+from pscv_classification import load_data, resolve_age_sex_columns, resolve_dedup_column
 from runtime_paths import ensure_app_workdir
 
 DEFAULT_RUN_CONF = Path("config/run.conf")
@@ -131,6 +131,7 @@ def run_batch(data_path: Path, queries_path: Path) -> Path:
 
     frame = load_data(data_path, separator=None, sheet=None).dropna(how="all")
     age_column, sex_column = resolve_age_sex_columns(frame)
+    dedup_column = resolve_dedup_column(frame)
 
     output_dir = OUTPUT_DIR
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -140,6 +141,10 @@ def run_batch(data_path: Path, queries_path: Path) -> Path:
     print(f"Data:    {data_path}  ({len(frame)} rows)")
     print(f"Queries: {queries_path}  ({len(expressions)} expressions)")
     print(f"Age: {age_column} · Sex: {sex_column}")
+    if dedup_column is not None:
+        print(f"Dedup: {dedup_column} (one row per person before counting)")
+    else:
+        print("Dedup: off")
     if get_app_config().silent_mode:
         print("Silent mode ON — only the batch file will be written.\n")
     else:

@@ -22,3 +22,8 @@ AGE_RANGE=[15:5:80+]
 GENDER_SEGMENTATION=true
 # Spreadsheet headers that hold sex / gender.
 GENDER_COLUMN=SEXO, Sexo
+
+# Unique person / patient key used to deduplicate before counting.
+# First matching header in the workbook wins. Empty (DEDUP_COLUMN=) disables
+# dedup and counts every row. Foot-risk exports use Documento; PSCV often uses RUT.
+DEDUP_COLUMN=Documento, RUT

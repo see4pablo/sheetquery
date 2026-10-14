@@ -20,7 +20,12 @@ from age_sex_segmentation import (
     wide_age_sex_men_women_table,
     age_sex_count_table,
 )
-from pscv_classification import load_data, resolve_age_sex_columns
+from pscv_classification import (
+    deduplicate_by_column,
+    load_data,
+    resolve_age_sex_columns,
+    resolve_dedup_column,
+)
 from pscv_columns import COL_CV_RISK
 from query_conditions import label_from_column_value_mode, sanitize_csv_comment
 from segmentation_config import get_segmentation
@@ -62,11 +67,25 @@ def run_query_on_mask(
 ) -> pd.DataFrame:
     """Count matching rows by age band and sex. Returns the wide one-row table."""
     subset = df.loc[mask]
+    raw_matches = len(subset)
+    dedup_column = resolve_dedup_column(df)
+    if dedup_column is not None:
+        subset = deduplicate_by_column(subset, dedup_column)
+    unique_matches = len(subset)
+    duplicates_removed = raw_matches - unique_matches
     if short_label:
         rule = "─" * min(76, max(24, len(short_label) + 12))
         print(f"\n{rule}\n  Query: {short_label}\n{rule}")
     print(f"\n{condition_description}")
-    print(f"Patients matching every condition: {len(subset)}")
+    if dedup_column is not None:
+        print(
+            f"Patients matching every condition: {unique_matches} "
+            f"(unique by {dedup_column}; {duplicates_removed} duplicate"
+            f"{'' if duplicates_removed == 1 else 's'} removed "
+            f"from {raw_matches} row{'s' if raw_matches != 1 else ''})"
+        )
+    else:
+        print(f"Patients matching every condition: {unique_matches}")
 
     cfg = get_segmentation()
     prepared = prepare_dimensions(subset, age_column=age_column, sex_column=sex_column)
