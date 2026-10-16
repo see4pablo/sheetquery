@@ -123,6 +123,21 @@ For the person who receives it:
 3. Double-click `SheetQuery.exe`
 4. Open the `batch_....csv` in `output\`
 
+### 4. In the browser (Pyodide)
+
+`browser_api.py` exposes an in-memory entry point used by
+[dev.see4pablo.cl/sheetquery](https://dev.see4pablo.cl/sheetquery/):
+
+```python
+from browser_api import run_batch_csv
+
+text = run_batch_csv(csv_text, ["DIABETES = SI", "SPACE", "RCV = BAJO"])
+```
+
+The personal site loads this file (and the other library modules + `config/`)
+from this GitHub repo via jsDelivr. Spreadsheet bytes stay in the user’s
+browser — nothing is uploaded to a SheetQuery server.
+
 ## Configuration
 
 | File | Purpose |
