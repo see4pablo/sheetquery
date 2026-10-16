@@ -44,9 +44,11 @@ def test_run_batch_csv_toy_english_headers(tmp_path, monkeypatch) -> None:
         segmentation_text=segmentation,
     )
     assert "# File: demo.csv" in out
-    assert "M-F" in out
     lines = [line for line in out.splitlines() if not line.startswith("#")]
-    assert len(lines) >= 3
-    assert lines[1] == ""
-    assert "," in lines[0]
-    assert "," in lines[2]
+    assert lines[0].startswith("Age,")
+    assert "40-44" in lines[0]
+    assert lines[1].startswith("Query,")
+    assert lines[1].count("M") >= 2 and lines[1].count("F") >= 2
+    assert lines[2].startswith("Diabetes = YES,")
+    assert lines[3] == ""
+    assert lines[4].startswith("Diabetes = YES AND Smoker = YES,")

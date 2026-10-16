@@ -10,6 +10,7 @@ Do not import interactive_query or run_batch here (readline / Path / Windows UI)
 from __future__ import annotations
 
 import contextlib
+import csv
 import io
 import re
 from datetime import datetime
@@ -157,23 +158,32 @@ def _compact_age_band_token(label: str) -> str:
     return cleaned.replace(" ", "-")
 
 
-def batch_segmentation_header_lines() -> list[str]:
+def _csv_line(cells: list[object]) -> str:
+    buf = io.StringIO()
+    csv.writer(buf, lineterminator="").writerow(cells)
+    return buf.getvalue()
+
+
+def batch_named_header_rows() -> list[list[str]]:
+    """Two header rows: Age + band names (each twice), then Query + M,F pairs."""
     cfg = get_segmentation()
     if cfg.age_segmentation and cfg.gender_segmentation:
         bands = [_compact_age_band_token(label) for label in cfg.age_range.labels()]
-        return [
-            "# " + "|".join(bands),
-            "# " + "|".join("M-F" for _ in bands),
-        ]
+        age_row: list[str] = ["Age"]
+        sex_row: list[str] = ["Query"]
+        for band in bands:
+            age_row.extend([band, band])
+            sex_row.extend(["M", "F"])
+        return [age_row, sex_row]
     if cfg.age_segmentation:
         bands = [_compact_age_band_token(label) for label in cfg.age_range.labels()]
-        return ["# " + "|".join(bands)]
+        return [["Age", *bands], ["Query", *(["Count"] * len(bands))]]
     if cfg.gender_segmentation:
-        return ["# M-F"]
-    return ["# Count"]
+        return [["Age", "All"], ["Query", "M", "F"]]
+    return [["Age"], ["Query", "Count"]]
 
 
-def table_to_batch_number_line(table: pd.DataFrame) -> str:
+def table_to_batch_values(table: pd.DataFrame) -> list[int]:
     row = table.iloc[0]
     columns = table.columns
     if not isinstance(columns, pd.MultiIndex):
@@ -193,7 +203,12 @@ def table_to_batch_number_line(table: pd.DataFrame) -> str:
         values.append(int(row.iloc[index]))
         values.append(int(row.iloc[index + 1]))
         index += 2
-    return ", ".join(str(value) for value in values)
+    return values
+
+
+def table_to_batch_number_line(table: pd.DataFrame) -> str:
+    """Legacy helper: comma-separated counts only."""
+    return ", ".join(str(value) for value in table_to_batch_values(table))
 
 
 def run_batch_csv(
@@ -225,8 +240,9 @@ def run_batch_csv(
     lines = [
         f"# File: {sanitize_csv_comment(source_name)}",
         f"# Session: {stamp}",
-        *batch_segmentation_header_lines(),
     ]
+    for header_row in batch_named_header_rows():
+        lines.append(_csv_line(header_row))
 
     for raw in queries:
         phrase = (raw or "").strip()
@@ -246,6 +262,6 @@ def run_batch_csv(
                 include_totals=True,
                 short_label=label,
             )
-        lines.append(table_to_batch_number_line(table))
+        lines.append(_csv_line([phrase, *table_to_batch_values(table)]))
 
     return "\n".join(lines) + "\n"
