@@ -184,6 +184,8 @@ def batch_named_header_rows() -> list[list[str]]:
 
 
 def table_to_batch_values(table: pd.DataFrame) -> list[int]:
+    # TODO(segmentation-off): also handle age-only / gender-only / neither
+    # (see TODO.md). Currently assumes age×sex MultiIndex (both axes on).
     row = table.iloc[0]
     columns = table.columns
     if not isinstance(columns, pd.MultiIndex):
